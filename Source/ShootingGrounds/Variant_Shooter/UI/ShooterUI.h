@@ -22,5 +22,13 @@ public:
 
 	/** Allows Blueprint to update timer */
 	UFUNCTION(BlueprintImplementableEvent, Category="Shooter", meta = (DisplayName = "Update Timer"))
-	void BP_UpdateTimer(int32 SecondsLeft);
+	void BP_UpdateTimer(float SecondsLeft);
+
+	/** Allows Blueprint to reveal Start Button */
+	UFUNCTION(BlueprintImplementableEvent, Category="Shooter", meta = (DisplayName = "Show Start Round Button"))
+	void BP_ShowStartRoundButton();
+
+	/** Allows Blueprint to hide Start Button */
+	UFUNCTION(BlueprintImplementableEvent, Category="Shooter", meta = (DisplayName = "Hide Start Round Button"))
+	void BP_HideStartRoundButton();
 };

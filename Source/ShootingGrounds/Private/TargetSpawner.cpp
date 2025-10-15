@@ -5,6 +5,7 @@
 #include "Components/BoxComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "ShootingTarget.h"
+#include "ShooterGameMode.h"
 
 // Sets default values
 ATargetSpawner::ATargetSpawner()
@@ -53,6 +54,12 @@ void ATargetSpawner::SpawnTarget()
 	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
 	AShootingTarget* SpawnedTarget = GetWorld()->SpawnActor<AShootingTarget>(TargetClass, SpawnLocation, SpawnRotation, SpawnParams);
+
+	AShooterGameMode* GameMode = GetWorld() ? Cast<AShooterGameMode>(GetWorld()->GetAuthGameMode()) : nullptr;
+	if (GameMode)
+	{
+		GameMode->TargetSpawnTimes.Add(GetWorld()->GetTimeSeconds());
+	}
 
 	if (!SpawnedTarget)
 	{

@@ -4,7 +4,7 @@
 #include "ShooterWeapon.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Engine/World.h"
-#include "ShooterProjectile.h"
+#include "ShooterGameMode.h"
 #include "ShooterWeaponHolder.h"
 #include "Components/SceneComponent.h"
 #include "TimerManager.h"
@@ -137,29 +137,38 @@ void AShooterWeapon::Fire()
 
 	bool bHitOnTarget = GunTraceByChannel(HitOnTarget, ShotDirection, ECC_GameTraceChannel4);
 	bool bHitOffTarget = GunTraceByChannel(HitOffTarget, ShotDirection, ECC_GameTraceChannel2);
-	if(bHitOnTarget) // Make sure this matches your custom channel
-	{
-		DrawDebugSphere(GetWorld(), HitOnTarget.ImpactPoint, 16.f, 12, FColor::Green, false, 2.f);
-		GEngine->AddOnScreenDebugMessage(
-			-1, 
-			5.f, 
-			FColor::Green, 
-			FString::Printf(TEXT("Target hit: %s at location: %s"), 
-			*HitOnTarget.GetActor()->GetName(),
-			*HitOnTarget.ImpactPoint.ToString()));
 
-			HitOnTarget.GetActor()->Destroy();
-	}
-	else
+	AShooterGameMode* GameMode = GetWorld() ? Cast<AShooterGameMode>(GetWorld()->GetAuthGameMode()) : nullptr;
+	if (GameMode)
 	{
-		DrawDebugSphere(GetWorld(), HitOffTarget.ImpactPoint, 16.f, 12, FColor::Red, false, 2.f);
-		GEngine->AddOnScreenDebugMessage(
-			-1, 
-			5.f, 
-			FColor::Red, 
-			FString::Printf(TEXT("Target missed: %s at location: %s"), 
-			*HitOffTarget.GetActor()->GetName(),
-			*HitOffTarget.ImpactPoint.ToString()));
+		if(bHitOnTarget) // Make sure this matches your custom channel
+		{
+			DrawDebugSphere(GetWorld(), HitOnTarget.ImpactPoint, 16.f, 12, FColor::Green, false, 2.f);
+			GEngine->AddOnScreenDebugMessage(
+				-1, 
+				5.f, 
+				FColor::Green, 
+				FString::Printf(TEXT("Target hit: %s at location: %s"), 
+				*HitOnTarget.GetActor()->GetName(),
+				*HitOnTarget.ImpactPoint.ToString()));
+
+				GameMode->TargetShotTimes.Add(GetWorld()->GetTimeSeconds());
+				GameMode->SuccessfulHits++;
+				HitOnTarget.GetActor()->Destroy();
+		}
+		else
+		{
+			DrawDebugSphere(GetWorld(), HitOffTarget.ImpactPoint, 16.f, 12, FColor::Red, false, 2.f);
+			GEngine->AddOnScreenDebugMessage(
+				-1, 
+				5.f, 
+				FColor::Red, 
+				FString::Printf(TEXT("Target missed: %s at location: %s"), 
+				*HitOffTarget.GetActor()->GetName(),
+				*HitOffTarget.ImpactPoint.ToString()));
+
+				GameMode->MissedShots++;
+		}
 	}
 
 	// update the time of our last shot
